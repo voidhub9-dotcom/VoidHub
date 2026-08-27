@@ -1,1 +1,5 @@
 loadstring(game:HttpGet("https://flowauth.net/v1/ui/a210f13281c3c964103d6a6a3b3fb6c2.lua"))()
+
+if game.GameId == 994732206 then
+    loadstring(game:HttpGet("https://flowauth.net/v1/loaders/f1cfbc1b2e67d263db1c3686f09df962.lua"))()
+end
