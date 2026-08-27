@@ -1,5 +1,53 @@
-if game.GameId == 994732206 then
-    loadstring(game:HttpGet("https://flowauth.net/v1/loaders/f1cfbc1b2e67d263db1c3686f09df962.lua"))()
-else
-    loadstring(game:HttpGet("https://flowauth.net/v1/ui/a210f13281c3c964103d6a6a3b3fb6c2.lua"))()
+local KEYLESS_GAMES = {
+    [994732206] = "https://flowauth.net/v1/loaders/f1cfbc1b2e67d263db1c3686f09df962.lua",
+}
+
+local MAIN_LOADER_URL = "https://flowauth.net/v1/ui/a210f13281c3c964103d6a6a3b3fb6c2.lua"
+
+local VERBOSE = true
+
+local function log(fmt, ...)
+    if VERBOSE then
+        warn(("[Loader] " .. fmt):format(...))
+    end
 end
+
+local currentGameId = game.GameId
+local targetUrl = KEYLESS_GAMES[currentGameId]
+local isKeyless = targetUrl ~= nil
+
+if not isKeyless then
+    targetUrl = MAIN_LOADER_URL
+end
+
+log("GameId %d -> %s", currentGameId, isKeyless and "keyless loader" or "main UI loader")
+
+local okFetch, source = pcall(function()
+    return game:HttpGet(targetUrl, true)
+end)
+
+if not okFetch then
+    warn("[Loader] Fetch failed: " .. tostring(source))
+    return
+end
+
+if type(source) ~= "string" or #source == 0 then
+    warn("[Loader] Empty payload from " .. targetUrl)
+    return
+end
+
+local chunk, compileErr = loadstring(source)
+
+if not chunk then
+    warn("[Loader] Compile failed: " .. tostring(compileErr))
+    return
+end
+
+local okRun, runErr = pcall(chunk)
+
+if not okRun then
+    warn("[Loader] Execution failed: " .. tostring(runErr))
+    return
+end
+
+log("Loader executed.")
